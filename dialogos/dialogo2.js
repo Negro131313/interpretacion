@@ -1,56 +1,68 @@
-const dialogo = [
+window.dialogo_2 = [
     {
         personaje: "Doctor",
         clase: "doctor",
         voz: "en-US",
-        texto: "Good morning. What brings you in today?"
+        texto: "Good afternoon. How are you feeling today?"
     },
     {
         personaje: "Paciente",
         clase: "paciente",
         voz: "es-MX",
-        texto: "Buenos días, doctor. Me he sentido muy cansado durante la última semana y también me duele la garganta."
+        texto: "Buenas tardes, doctor. Desde ayer tengo un fuerte dolor de cabeza y me siento muy débil."
     },
     {
         personaje: "Doctor",
         clase: "doctor",
         voz: "en-US",
-        texto: "I see. Have you had a fever or a cough?"
+        texto: "When did the headache start?"
     },
     {
         personaje: "Paciente",
         clase: "paciente",
         voz: "es-MX",
-        texto: "Sí, tuve un poco de fiebre hace dos días y he estado tosiendo, sobre todo por las noches."
+        texto: "Comenzó ayer por la mañana y ha empeorado poco a poco."
     },
     {
         personaje: "Doctor",
         clase: "doctor",
         voz: "en-US",
-        texto: "Have you taken any medication?"
+        texto: "Have you been drinking enough water?"
     },
     {
         personaje: "Paciente",
         clase: "paciente",
         voz: "es-MX",
-        texto: "Solo algunos medicamentos de venta libre, pero no me han ayudado mucho."
+        texto: "Creo que no. He estado muy ocupado en el trabajo y casi no he tomado agua."
     },
     {
         personaje: "Doctor",
         clase: "doctor",
         voz: "en-US",
-        texto: "Antibiotics won't help with a viral infection. I recommend rest and drinking plenty of fluids."
+        texto: "Dehydration can cause headaches. I also want to check your blood pressure."
     },
     {
         personaje: "Paciente",
         clase: "paciente",
         voz: "es-MX",
-        texto: "Muchas gracias, doctor. Seguiré sus recomendaciones."
+        texto: "De acuerdo, doctor. Espero que no sea nada grave."
     },
     {
         personaje: "Doctor",
         clase: "doctor",
         voz: "en-US",
-        texto: "You're welcome. Take care of yourself, and I hope you feel better soon."
+        texto: "Don't worry. We'll examine you and decide the best treatment."
+    },
+    {
+        personaje: "Paciente",
+        clase: "paciente",
+        voz: "es-MX",
+        texto: "Muchas gracias por su ayuda."
+    },
+    {
+        personaje: "Doctor",
+        clase: "doctor",
+        voz: "en-US",
+        texto: "You're welcome. Please get some rest and drink plenty of water today."
     }
 ];
