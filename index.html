@@ -4,6 +4,13 @@
 <meta charset="UTF-8">
 <title>Doctor y Paciente</title>
 
+<!-- Cargamos los diálogos -->
+<script src="dialogos/dialogo1.js"></script>
+<script src="dialogos/dialogo2.js"></script>
+<script src="dialogos/dialogo3.js"></script>
+<script src="dialogos/dialogo4.js"></script>
+<script src="dialogos/dialogo5.js"></script>
+
 <style>
 body {
     font-family: Arial, sans-serif;
@@ -18,11 +25,13 @@ h1 {
 
 .chat {
     max-width: 700px;
+    height: 420px;
     margin: auto;
     background: white;
     padding: 20px;
     border-radius: 15px;
     box-shadow: 0 0 10px #aaa;
+    overflow-y: auto;
 }
 
 .linea {
@@ -39,15 +48,79 @@ h1 {
     background: #dcfce7;
 }
 
-button {
+#respuesta {
     display: block;
+    width: 700px;
+    height: 130px;
     margin: 20px auto;
-    padding: 15px 30px;
+    padding: 12px;
     font-size: 18px;
+    font-family: Arial, sans-serif;
+    resize: vertical;
+    border-radius: 10px;
+    border: 1px solid #bbb;
+    box-sizing: border-box;
+}
+
+.botones {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+button {
+    padding: 12px 24px;
+    font-size: 16px;
     cursor: pointer;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    background: #fff;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: #e5e7eb;
+}
+
+/* Estilo para el botón secundario más pequeño */
+button.btn-secundario {
+    padding: 8px 14px;
+    font-size: 14px;
+    color: #4b5563;
+    border-color: #d1d5db;
+}
+
+button.btn-secundario:hover {
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+/* --- Efectos de destello para los botones --- */
+button.correcto {
+    background-color: #22c55e !important;
+    color: white !important;
+    border-color: #16a34a !important;
+    box-shadow: 0 0 15px #22c55e;
+    transform: scale(1.05);
+}
+
+button.incorrecto {
+    background-color: #ef4444 !important;
+    color: white !important;
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 15px #ef4444;
+    transform: scale(0.98);
+}
+
+button.borrado {
+    background-color: #6b7280 !important;
+    color: white !important;
+    border-color: #4b5563 !important;
+    box-shadow: 0 0 10px #6b7280;
 }
 </style>
-
 </head>
 
 <body>
@@ -56,81 +129,158 @@ button {
 
 <div class="chat" id="chat"></div>
 
-<button onclick="hablar()">🔊 Escuchar conversación</button>
+<textarea
+  id="respuesta"
+  placeholder="Escribe aquí tu interpretación..."
+  spellcheck="false"></textarea>
+
+<div class="botones">
+    <button onclick="hablar()">🔊 Escuchar conversación</button>
+    <button id="btnLimpiar" class="btn-secundario" onclick="limpiarTexto()">🗑 Borrar</button>
+    <button onclick="cambiarDialogo()">🔀 Cambiar diálogo</button>
+    <button id="btnComprobar" onclick="comprobar()">✔ Comprobar</button>
+</div>
 
 <script>
+let indiceActual = -1;
 
-let dialogo = [];
-
-async function cargarDialogo(){
-
-    // Leer la lista de archivos
-    const respuesta = await fetch("dialogos/manifest.json");
-    const archivos = await respuesta.json();
-
-    // Elegir uno al azar
-    const archivo = archivos[Math.floor(Math.random() * archivos.length)];
-
-    // Cargar el JS
-    const script = document.createElement("script");
-    script.src = "dialogos/" + archivo;
-
-    script.onload = function(){
-
-        const chat = document.getElementById("chat");
-
-        dialogo.forEach(linea=>{
-
-            const div = document.createElement("div");
-
-            div.className = "linea " + linea.clase;
-            div.dataset.voz = linea.voz;
-            div.innerHTML = "<b>" + linea.personaje + ":</b> " + linea.texto;
-
-            chat.appendChild(div);
-
-        });
-
-    };
-
-    document.body.appendChild(script);
-
+function obtenerDialogosDisponibles() {
+    const lista = [];
+    if (window.dialogo_1) lista.push(window.dialogo_1);
+    if (window.dialogo_2) lista.push(window.dialogo_2);
+    if (window.dialogo_3) lista.push(window.dialogo_3);
+    return lista;
 }
 
-function hablar(){
+function renderizarDialogo(dialogo) {
+    const chat = document.getElementById("chat");
+    chat.innerHTML = "";
 
+    dialogo.forEach(linea => {
+        const div = document.createElement("div");
+        div.className = "linea " + linea.clase;
+        div.dataset.voz = linea.voz;
+        div.innerHTML = "<b>" + linea.personaje + ":</b> " + linea.texto;
+        chat.appendChild(div);
+    });
+
+    chat.scrollTop = 0;
+}
+
+function cambiarDialogo() {
     speechSynthesis.cancel();
 
-    let frases = document.querySelectorAll(".linea");
+    const lista = obtenerDialogosDisponibles();
+    if (lista.length === 0) return;
+
+    let nuevoIndice;
+    do {
+        nuevoIndice = Math.floor(Math.random() * lista.length);
+    } while (nuevoIndice === indiceActual && lista.length > 1);
+
+    indiceActual = nuevoIndice;
+
+    document.getElementById("respuesta").value = "";
+    renderizarDialogo(lista[indiceActual]);
+}
+
+function hablar() {
+    speechSynthesis.cancel();
+
+    const frases = document.querySelectorAll(".linea");
     let indice = 0;
 
-    function siguiente(){
-
-        if(indice>=frases.length) return;
+    function siguiente() {
+        if (indice >= frases.length) return;
 
         let voz = new SpeechSynthesisUtterance(frases[indice].innerText);
-
         voz.lang = frases[indice].dataset.voz;
         voz.rate = 0.9;
         voz.pitch = 1;
 
-        voz.onend = function(){
-
+        voz.onend = function() {
             indice++;
-            siguiente();
-
+            setTimeout(function() {
+                siguiente();
+            }, 1200);
         };
 
         speechSynthesis.speak(voz);
-
     }
 
     siguiente();
-
 }
 
-cargarDialogo();
+function normalizar(texto) {
+    return texto
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+}
 
+function obtenerTextoDialogo(dialogo) {
+    return dialogo.map(linea => linea.texto).join(" ");
+}
+
+function limpiarTexto() {
+    const campoTexto = document.getElementById("respuesta");
+    const btn = document.getElementById("btnLimpiar");
+    
+    campoTexto.value = "";
+    campoTexto.focus();
+
+    mostrarEfectoBotón(btn, "borrado");
+}
+
+function comprobar() {
+    const btn = document.getElementById("btnComprobar");
+    const lista = obtenerDialogosDisponibles();
+    if (indiceActual === -1 || !lista[indiceActual]) return;
+
+    const entradaUsuario = document.getElementById("respuesta").value;
+    const textoLimpioUsuario = normalizar(entradaUsuario);
+    const palabrasUsuario = textoLimpioUsuario.split(" ").filter(Boolean);
+
+    if (palabrasUsuario.length < 4) {
+        mostrarEfectoBotón(btn, "incorrecto");
+        return;
+    }
+
+    const textoOriginalLimpio = normalizar(obtenerTextoDialogo(lista[indiceActual]));
+    let coincide = false;
+
+    for (let i = 0; i <= palabrasUsuario.length - 4; i++) {
+        const bloque4 = palabrasUsuario.slice(i, i + 4).join(" ");
+        if (textoOriginalLimpio.includes(bloque4)) {
+            coincide = true;
+            break;
+        }
+    }
+
+    if (coincide) {
+        mostrarEfectoBotón(btn, "correcto");
+    } else {
+        mostrarEfectoBotón(btn, "incorrecto");
+    }
+}
+
+function mostrarEfectoBotón(boton, clase) {
+    boton.classList.remove("correcto", "incorrecto", "borrado");
+    
+    void boton.offsetWidth; 
+    
+    boton.classList.add(clase);
+
+    setTimeout(() => {
+        boton.classList.remove(clase);
+    }, 1000);
+}
+
+// Cargar diálogo al iniciar
+cambiarDialogo();
 </script>
 
 </body>
