@@ -1,4 +1,4 @@
-const dialogo = [
+window.dialogo_1 = [
     {
         personaje: "Doctor",
         clase: "doctor",
